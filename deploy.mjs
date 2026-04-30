@@ -4,7 +4,15 @@ import { join } from 'path'
 
 const DEPLOY_DIR = 'deploy'
 
-console.log('🔨 Building Vue app...')
+console.log('🧪 Running tests...')
+try {
+  execSync('npm run test:run', { stdio: 'inherit' })
+} catch {
+  console.error('\n❌ Tests failed — aborting deploy.')
+  process.exit(1)
+}
+
+console.log('\n🔨 Building Vue app...')
 execSync('npm run build', { stdio: 'inherit' })
 
 console.log('\n📁 Preparing deploy folder...')

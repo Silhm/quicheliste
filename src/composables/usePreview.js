@@ -25,3 +25,7 @@ export function usePreview() {
 
   return { preview }
 }
+
+export function _clearCache() {
+  for (const key of Object.keys(cache)) delete cache[key]
+}
