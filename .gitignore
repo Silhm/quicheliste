@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# User data (keep directory structure via .gitkeep)
+data/users.json
+data/wishlists/*.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+php_errors.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
