@@ -9,7 +9,6 @@ A self-hosted wishlist app for family and friends. Create gift wishlists, share 
 - **Gift items** — name, price, link, description, image preview (via Open Graph)
 - **Share links** — shareable read-only URL per wishlist; no account needed to view
 - **Reservations** — friends reserve items anonymously; the wishlist owner never sees who reserved what
-- **Family feed** — logged-in users see everyone's wishlists on the home page
 - **Admin panel** — recover anyone's access link without a password reset flow
 - **Multilingual** — English and French built-in, easy to extend
 - **Zero infrastructure** — PHP 8+ and flat JSON files, no database required
