@@ -68,6 +68,14 @@
                 {{ t('wishlist.reserved') }}
               </div>
             </div>
+
+            <!-- Preview image -->
+            <template v-if="item.link">
+              <div v-if="preview(item.link) === null" class="flex-shrink-0 w-16 h-16 rounded-xl bg-slate-100 animate-pulse" />
+              <a v-else-if="preview(item.link)" :href="item.link" target="_blank" rel="noopener" class="flex-shrink-0">
+                <img :src="preview(item.link)" class="w-16 h-16 object-cover rounded-xl border border-slate-100" />
+              </a>
+            </template>
           </div>
         </div>
       </div>
@@ -93,10 +101,12 @@ import { useI18n } from 'vue-i18n'
 import NavBar from '../components/NavBar.vue'
 import ItemModal from '../components/ItemModal.vue'
 import { useWishlistStore } from '../stores/wishlists'
+import { usePreview } from '../composables/usePreview'
 
 const route = useRoute()
 const store = useWishlistStore()
 const { t } = useI18n()
+const { preview } = usePreview()
 
 const editingTitle = ref(false)
 const titleDraft   = ref('')

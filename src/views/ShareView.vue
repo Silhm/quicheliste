@@ -39,7 +39,15 @@
                 item.reserved ? 'opacity-60 border-slate-100' : 'border-slate-100 hover:shadow-md'
               ]"
             >
-              <div class="flex items-start justify-between gap-4">
+              <div class="flex items-start gap-4">
+                <!-- Preview image -->
+                <template v-if="item.link">
+                  <div v-if="preview(item.link) === null" class="flex-shrink-0 w-20 h-20 rounded-xl bg-slate-100 animate-pulse" />
+                  <a v-else-if="preview(item.link)" :href="item.link" target="_blank" rel="noopener" class="flex-shrink-0">
+                    <img :src="preview(item.link)" :class="['w-20 h-20 object-cover rounded-xl border border-slate-100', item.reserved && 'grayscale']" />
+                  </a>
+                </template>
+
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-2 flex-wrap">
                     <span :class="['font-semibold text-slate-800', item.reserved && 'line-through']">{{ item.name }}</span>
@@ -51,6 +59,7 @@
                   <p v-if="item.description" class="text-sm text-slate-500 mt-1">{{ item.description }}</p>
                   <p v-if="item.reserved" class="text-xs text-emerald-600 font-medium mt-2">✓ {{ t('share.alreadyReserved') }}</p>
                 </div>
+
                 <button
                   v-if="!item.reserved"
                   @click="openReserve(item)"
@@ -97,11 +106,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { setLocale, LOCALES, LOCALE_FLAGS } from '../i18n'
+import { i18n, setLocale, LOCALES, LOCALE_FLAGS } from '../i18n'
+import { usePreview } from '../composables/usePreview'
 import api from '../api'
 
 const route = useRoute()
-const { t, locale } = useI18n()
+const { t } = useI18n()
+const locale = computed(() => i18n.global.locale.value)
+const { preview } = usePreview()
 
 const wishlist     = ref(null)
 const loading      = ref(true)
