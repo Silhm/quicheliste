@@ -1,0 +1,4 @@
+- [ ] Drag and drop items
+- [ ] Review preview image og:image doesn't seem enough
+- [ ] Dark mode
+- [ ] Create groups / family
