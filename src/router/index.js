@@ -12,7 +12,7 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach(async (to) => {
+export async function navigationGuard(to) {
   // Capture token from URL query param (first visit after registration)
   const urlParams = new URLSearchParams(window.location.search)
   const urlToken  = urlParams.get('token')
@@ -29,6 +29,9 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAuth && !auth.isLoggedIn) return '/register'
   if (to.meta.requiresAdmin && !auth.isAdmin)   return '/'
-})
+  if (to.path === '/register' && auth.isLoggedIn) return '/'
+}
+
+router.beforeEach(navigationGuard)
 
 export default router

@@ -19,8 +19,10 @@ export default {
     namePlaceholder: 'Votre prénom',
     submit: "Obtenir mon lien d'accès",
     submitting: 'Création du compte…',
-    linkLabel: "Votre lien d'accès personnel — ajoutez-le aux favoris !",
-    copy: 'Copier',
+    greeting: 'Bonjour {name} !',
+    linkIntro: "Votre lien d'accès personnel est prêt. Ajoutez-le aux favoris — c'est ainsi que vous reviendrez.",
+    linkLabel: "Votre lien d'accès personnel",
+    copy: 'Copier le lien',
     goHome: 'Aller à ma liste',
   },
   home: {

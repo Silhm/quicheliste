@@ -19,8 +19,10 @@ export default {
     namePlaceholder: 'Your first name',
     submit: 'Get my wishlist link',
     submitting: 'Creating account…',
-    linkLabel: 'Your personal access link — bookmark it!',
-    copy: 'Copy',
+    greeting: 'Hello {name}!',
+    linkIntro: 'Your personal access link is ready. Bookmark it — it\'s how you\'ll always come back.',
+    linkLabel: 'Your personal access link',
+    copy: 'Copy link',
     goHome: 'Go to my wishlist',
   },
   home: {
