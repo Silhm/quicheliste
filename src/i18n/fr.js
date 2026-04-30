@@ -58,6 +58,9 @@ export default {
     yourName: 'Votre prénom',
     confirm: 'Confirmer',
     confirming: 'Enregistrement…',
+    ctaTitle: 'Vous voulez votre propre liste ?',
+    ctaText: 'Créez la vôtre gratuitement et partagez-la avec votre famille et vos amis.',
+    ctaButton: 'Créer ma liste',
   },
   admin: {
     title: 'Admin — Tous les utilisateurs',

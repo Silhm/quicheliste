@@ -77,6 +77,19 @@
         <div class="text-4xl mb-2">😕</div>
         <p>{{ t('share.notFound') }}</p>
       </div>
+
+      <!-- CTA for first-time visitors -->
+      <div v-if="wishlist" class="mt-12 border-t border-indigo-100 pt-10 text-center">
+        <p class="text-2xl mb-2">🎁</p>
+        <h2 class="text-lg font-bold text-slate-700">{{ t('share.ctaTitle') }}</h2>
+        <p class="text-sm text-slate-500 mt-1 mb-4">{{ t('share.ctaText') }}</p>
+        <RouterLink
+          to="/register"
+          class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl transition"
+        >
+          {{ t('share.ctaButton') }}
+        </RouterLink>
+      </div>
     </div>
 
     <!-- Reserve modal -->

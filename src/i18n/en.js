@@ -58,6 +58,9 @@ export default {
     yourName: 'Your name',
     confirm: 'Confirm',
     confirming: 'Saving…',
+    ctaTitle: 'Want your own wishlist?',
+    ctaText: 'Create yours for free and share it with your family and friends.',
+    ctaButton: 'Create my wishlist',
   },
   admin: {
     title: 'Admin — All Users',
