@@ -13,13 +13,13 @@
           </div>
           <form v-else @submit.prevent="saveTitle" class="flex gap-2">
             <input v-model="titleDraft" class="flex-1 border border-indigo-400 rounded-xl px-3 py-1 text-lg font-bold focus:outline-none" autofocus />
-            <button type="submit" class="px-3 py-1 bg-indigo-600 text-white rounded-xl text-sm">Save</button>
-            <button type="button" @click="editingTitle = false" class="px-3 py-1 border rounded-xl text-sm">Cancel</button>
+            <button type="submit" class="px-3 py-1 bg-indigo-600 text-white rounded-xl text-sm">{{ t('common.save') }}</button>
+            <button type="button" @click="editingTitle = false" class="px-3 py-1 border rounded-xl text-sm">{{ t('common.cancel') }}</button>
           </form>
           <p v-if="store.current.description" class="text-slate-500 mt-1 text-sm">{{ store.current.description }}</p>
         </div>
         <button @click="copyShareLink" class="flex-shrink-0 flex items-center gap-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 text-sm font-medium px-4 py-2 rounded-xl transition">
-          {{ shareCopied ? '✓ Copied!' : '🔗 Share' }}
+          {{ shareCopied ? t('common.copied') : t('wishlist.share') }}
         </button>
       </div>
 
@@ -28,15 +28,16 @@
         @click="openAdd"
         class="w-full border-2 border-dashed border-indigo-200 hover:border-indigo-400 text-indigo-500 hover:text-indigo-700 rounded-2xl py-4 text-sm font-medium transition mb-6"
       >
-        + Add a gift idea
+        {{ t('wishlist.addItem') }}
       </button>
 
-      <!-- Items grouped by category -->
+      <!-- Empty state -->
       <div v-if="store.current.items.length === 0" class="text-center text-slate-400 py-12">
         <div class="text-4xl mb-2">🎀</div>
-        <p>Add your first wish above!</p>
+        <p>{{ t('wishlist.empty') }}</p>
       </div>
 
+      <!-- Items grouped by category -->
       <div v-for="(items, category) in groupedItems" :key="category" class="mb-8">
         <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{{ category }}</h3>
         <div class="space-y-3">
@@ -44,13 +45,10 @@
             v-for="(item, idx) in items" :key="item.id"
             class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex gap-4"
           >
-            <!-- Reorder -->
             <div class="flex flex-col gap-1 justify-center">
               <button @click="moveItem(item, category, idx, -1)" :disabled="idx === 0" class="text-slate-300 hover:text-slate-500 disabled:opacity-20 text-xs leading-none">▲</button>
               <button @click="moveItem(item, category, idx, +1)" :disabled="idx === items.length - 1" class="text-slate-300 hover:text-slate-500 disabled:opacity-20 text-xs leading-none">▼</button>
             </div>
-
-            <!-- Content -->
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
@@ -62,12 +60,12 @@
                   <p v-if="item.description" class="text-sm text-slate-500 mt-0.5">{{ item.description }}</p>
                 </div>
                 <div class="flex gap-1 flex-shrink-0">
-                  <button @click="openEdit(item)" class="text-xs text-slate-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50 transition">Edit</button>
+                  <button @click="openEdit(item)" class="text-xs text-slate-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50 transition">{{ t('wishlist.edit') }}</button>
                   <button @click="deleteItem(item)" class="text-xs text-slate-400 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 transition">✕</button>
                 </div>
               </div>
               <div v-if="item.reserved_by" class="mt-2 text-xs text-emerald-600 font-medium">
-                ✓ Reserved
+                {{ t('wishlist.reserved') }}
               </div>
             </div>
           </div>
@@ -76,7 +74,7 @@
 
     </main>
 
-    <div v-else-if="store.loading" class="text-center py-20 text-slate-400">Loading…</div>
+    <div v-else-if="store.loading" class="text-center py-20 text-slate-400">{{ t('common.loading') }}</div>
 
     <ItemModal
       v-if="modalOpen"
@@ -91,12 +89,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import NavBar from '../components/NavBar.vue'
 import ItemModal from '../components/ItemModal.vue'
 import { useWishlistStore } from '../stores/wishlists'
 
 const route = useRoute()
 const store = useWishlistStore()
+const { t } = useI18n()
 
 const editingTitle = ref(false)
 const titleDraft   = ref('')
@@ -126,7 +126,7 @@ function formatPrice(p) {
 }
 
 function startEditTitle() {
-  titleDraft.value  = store.current.title
+  titleDraft.value   = store.current.title
   editingTitle.value = true
 }
 
@@ -142,15 +142,8 @@ async function copyShareLink() {
   setTimeout(() => { shareCopied.value = false }, 2000)
 }
 
-function openAdd() {
-  editingItem.value = null
-  modalOpen.value   = true
-}
-
-function openEdit(item) {
-  editingItem.value = { ...item }
-  modalOpen.value   = true
-}
+function openAdd()   { editingItem.value = null; modalOpen.value = true }
+function openEdit(item) { editingItem.value = { ...item }; modalOpen.value = true }
 
 async function onSave(data) {
   if (editingItem.value) {
@@ -162,7 +155,7 @@ async function onSave(data) {
 }
 
 async function deleteItem(item) {
-  if (!confirm(`Remove "${item.name}"?`)) return
+  if (!confirm(t('wishlist.removeConfirm', { name: item.name }))) return
   await store.removeItem(store.current.id, item.id)
 }
 
