@@ -3,6 +3,7 @@ node_modules/
 
 # Build output
 dist/
+deploy/
 
 # User data (keep directory structure via .gitkeep)
 data/users.json
