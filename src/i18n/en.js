@@ -85,6 +85,7 @@ export default {
     imagePlaceholder: 'https://… (leave blank to use auto-detected image)',
     note: 'Note',
     notePlaceholder: 'Size, colour, any detail that helps…',
+    priority: 'Priority',
     addButton: 'Add item',
     saveButton: 'Save changes',
   },

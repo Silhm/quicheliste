@@ -29,6 +29,7 @@ if ($method === 'PUT') {
     if (array_key_exists('price', $body))       $item['price']       = $body['price'] !== '' && $body['price'] !== null ? (float)$body['price'] : null;
     if (array_key_exists('link', $body))        $item['link']        = trim($body['link']);
     if (array_key_exists('image', $body))       $item['image']       = trim($body['image']);
+    if (array_key_exists('priority', $body))    $item['priority']    = max(0, min(5, (int)$body['priority']));
     if (array_key_exists('description', $body)) $item['description'] = trim($body['description']);
     if (array_key_exists('category', $body))    $item['category']    = trim($body['category']) ?: 'General';
     if (array_key_exists('sort_order', $body))  $item['sort_order']  = (int)$body['sort_order'];

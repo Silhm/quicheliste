@@ -38,30 +38,39 @@
       </div>
 
       <!-- Items grouped by category -->
-      <div v-for="(items, category) in groupedItems" :key="category" class="mb-8">
-        <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{{ category }}</h3>
+      <div
+        v-for="(items, category) in groupedItems" :key="category"
+        class="mb-8 rounded-2xl transition-colors"
+        :class="dragOverCategory === category ? 'ring-2 ring-indigo-200 bg-indigo-50/50' : ''"
+        @dragover.prevent="onDragOver(category)"
+        @drop.prevent="onDropCategory(category)"
+      >
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3 px-1">{{ category }}</h3>
         <div class="space-y-3">
           <div
-            v-for="(item, idx) in items" :key="item.id"
-            class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex gap-4"
+            v-for="item in items" :key="item.id"
+            draggable="true"
+            @dragstart="onDragStart($event, item)"
+            @dragend="onDragEnd"
+            @dragover.prevent="onDragOver(category)"
+            @drop.prevent.stop="onDropItem(item, category)"
+            :class="['bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex gap-4 cursor-grab active:cursor-grabbing transition-opacity select-none', draggingItem?.id === item.id && 'opacity-30']"
           >
-            <div class="flex flex-col gap-1 justify-center">
-              <button @click="moveItem(item, category, idx, -1)" :disabled="idx === 0" class="text-slate-300 hover:text-slate-500 disabled:opacity-20 text-xs leading-none">▲</button>
-              <button @click="moveItem(item, category, idx, +1)" :disabled="idx === items.length - 1" class="text-slate-300 hover:text-slate-500 disabled:opacity-20 text-xs leading-none">▼</button>
-            </div>
+            <div class="flex items-center text-slate-300 text-lg leading-none select-none px-0.5">⠿</div>
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                   <div class="flex items-center gap-2 flex-wrap">
                     <span class="font-semibold text-slate-800">{{ item.name }}</span>
                     <span v-if="item.price" class="text-sm font-medium text-indigo-600">{{ formatPrice(item.price) }}</span>
+                    <span v-if="item.priority" class="text-xs text-amber-400 tracking-tighter">{{ '★'.repeat(item.priority) }}</span>
                     <a v-if="item.link" :href="item.link" target="_blank" rel="noopener" class="text-indigo-400 hover:text-indigo-600 text-sm transition">🔗</a>
                   </div>
                   <p v-if="item.description" class="text-sm text-slate-500 mt-0.5">{{ item.description }}</p>
                 </div>
                 <div class="flex gap-1 flex-shrink-0">
-                  <button @click="openEdit(item)" class="text-xs text-slate-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50 transition">{{ t('wishlist.edit') }}</button>
-                  <button @click="deleteItem(item)" class="text-xs text-slate-400 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 transition">✕</button>
+                  <button @click.stop="openEdit(item)" class="text-xs text-slate-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50 transition cursor-pointer">{{ t('wishlist.edit') }}</button>
+                  <button @click.stop="deleteItem(item)" class="text-xs text-slate-400 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-red-50 transition cursor-pointer">✕</button>
                 </div>
               </div>
               <div v-if="item.reserved_by" class="mt-2 text-xs text-emerald-600 font-medium">
@@ -112,11 +121,13 @@ const store = useWishlistStore()
 const { t } = useI18n()
 const { preview } = usePreview()
 
-const editingTitle = ref(false)
-const titleDraft   = ref('')
-const shareCopied  = ref(false)
-const modalOpen    = ref(false)
-const editingItem  = ref(null)
+const editingTitle    = ref(false)
+const titleDraft      = ref('')
+const shareCopied     = ref(false)
+const modalOpen       = ref(false)
+const editingItem     = ref(null)
+const draggingItem    = ref(null)
+const dragOverCategory = ref(null)
 onMounted(() => store.fetchOne(route.params.id))
 
 const groupedItems = computed(() => {
@@ -172,12 +183,43 @@ async function deleteItem(item) {
   await store.removeItem(store.current.id, item.id)
 }
 
-async function moveItem(item, category, idx, direction) {
-  const siblings = groupedItems.value[category]
-  const target   = siblings[idx + direction]
-  if (!target) return
-  await store.updateItem(store.current.id, item.id,   { sort_order: target.sort_order })
-  await store.updateItem(store.current.id, target.id, { sort_order: item.sort_order })
-  await store.fetchOne(store.current.id)
+function onDragStart(event, item) {
+  draggingItem.value = item
+  event.dataTransfer.effectAllowed = 'move'
+}
+
+function onDragEnd() {
+  draggingItem.value    = null
+  dragOverCategory.value = null
+}
+
+function onDragOver(category) {
+  if (draggingItem.value) dragOverCategory.value = category
+}
+
+async function onDropItem(targetItem, targetCategory) {
+  const src = draggingItem.value
+  draggingItem.value    = null
+  dragOverCategory.value = null
+  if (!src || src.id === targetItem.id) return
+
+  if (src.category === targetCategory) {
+    await store.updateItem(store.current.id, src.id,        { sort_order: targetItem.sort_order })
+    await store.updateItem(store.current.id, targetItem.id, { sort_order: src.sort_order })
+    await store.fetchOne(store.current.id)
+  } else {
+    await store.updateItem(store.current.id, src.id, { category: targetCategory, sort_order: targetItem.sort_order })
+  }
+}
+
+async function onDropCategory(category) {
+  const src = draggingItem.value
+  draggingItem.value    = null
+  dragOverCategory.value = null
+  if (!src || src.category === category) return
+
+  const items    = groupedItems.value[category] || []
+  const maxOrder = items.length ? Math.max(...items.map(i => i.sort_order)) : 0
+  await store.updateItem(store.current.id, src.id, { category, sort_order: maxOrder + 1 })
 }
 </script>

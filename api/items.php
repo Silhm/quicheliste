@@ -31,6 +31,7 @@ $item = [
     'price'       => isset($body['price']) && $body['price'] !== '' ? (float)$body['price'] : null,
     'link'        => trim($body['link'] ?? ''),
     'image'       => trim($body['image'] ?? ''),
+    'priority'    => isset($body['priority']) ? max(0, min(5, (int)$body['priority'])) : 0,
     'description' => trim($body['description'] ?? ''),
     'category'    => $category,
     'sort_order'  => $maxOrder + 1,

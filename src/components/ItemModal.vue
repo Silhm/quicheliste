@@ -60,6 +60,18 @@
           <img v-if="form.image" :src="form.image" class="mt-2 w-20 h-20 object-cover rounded-xl border border-slate-100" @error="form.image = ''" />
         </div>
 
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('modal.priority') }}</label>
+          <div class="flex gap-1">
+            <button
+              v-for="n in 5" :key="n"
+              type="button"
+              @click="form.priority = form.priority === n ? 0 : n"
+              :class="['text-2xl leading-none transition', n <= form.priority ? 'text-amber-400' : 'text-slate-200 hover:text-amber-200']"
+            >★</button>
+          </div>
+        </div>
+
         <div class="mb-6">
           <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('modal.note') }}</label>
           <textarea
@@ -92,7 +104,7 @@ const props = defineProps({
 const emit = defineEmits(['save', 'close'])
 const { t } = useI18n()
 
-const form = reactive({ name: '', category: '', price: '', link: '', image: '', description: '' })
+const form = reactive({ name: '', category: '', price: '', link: '', image: '', priority: 0, description: '' })
 
 watch(() => props.item, (val) => {
   form.name        = val?.name        ?? ''
@@ -100,6 +112,7 @@ watch(() => props.item, (val) => {
   form.price       = val?.price != null ? String(val.price) : ''
   form.link        = val?.link        ?? ''
   form.image       = val?.image       ?? ''
+  form.priority    = val?.priority    ?? 0
   form.description = val?.description ?? ''
 }, { immediate: true })
 
@@ -111,6 +124,7 @@ function submit() {
     price:       form.price !== '' ? parseFloat(form.price) : null,
     link:        form.link.trim(),
     image:       form.image.trim(),
+    priority:    form.priority,
     description: form.description.trim(),
   })
 }
