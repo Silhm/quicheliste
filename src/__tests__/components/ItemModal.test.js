@@ -104,7 +104,8 @@ describe('ItemModal', () => {
   describe('cancel button', () => {
     it('emits close when clicked', async () => {
       const wrapper = mountModal()
-      await wrapper.find('button[type="button"]').trigger('click')
+      const cancelBtn = wrapper.findAll('button[type="button"]').find(b => b.text() === 'Cancel')
+      await cancelBtn.trigger('click')
       expect(wrapper.emitted('close')).toBeTruthy()
     })
   })
