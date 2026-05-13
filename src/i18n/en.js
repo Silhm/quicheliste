@@ -61,6 +61,8 @@ export default {
     ctaTitle: 'Want your own wishlist?',
     ctaText: 'Create yours for free and share it with your family and friends.',
     ctaButton: 'Create my wishlist',
+    sortDefault: 'Category',
+    sortPrice: 'Price',
   },
   admin: {
     title: 'Admin — All Users',

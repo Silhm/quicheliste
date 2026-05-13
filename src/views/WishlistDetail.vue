@@ -68,7 +68,6 @@
                 {{ t('wishlist.reserved') }}
               </div>
             </div>
-
             <!-- Preview image: manual takes priority, falls back to scraped og:image -->
             <template v-if="item.image || item.link">
               <a v-if="item.image" :href="item.link || undefined" :target="item.link ? '_blank' : undefined" rel="noopener" class="flex-shrink-0">
@@ -118,7 +117,6 @@ const titleDraft   = ref('')
 const shareCopied  = ref(false)
 const modalOpen    = ref(false)
 const editingItem  = ref(null)
-
 onMounted(() => store.fetchOne(route.params.id))
 
 const groupedItems = computed(() => {

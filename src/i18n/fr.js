@@ -61,6 +61,8 @@ export default {
     ctaTitle: 'Vous voulez votre propre liste ?',
     ctaText: 'Créez la vôtre gratuitement et partagez-la avec votre famille et vos amis.',
     ctaButton: 'Créer ma liste',
+    sortDefault: 'Catégorie',
+    sortPrice: 'Prix',
   },
   admin: {
     title: 'Admin — Tous les utilisateurs',

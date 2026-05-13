@@ -29,50 +29,82 @@
           <p>{{ t('share.empty') }}</p>
         </div>
 
-        <div v-for="(items, category) in groupedItems" :key="category" class="mb-8">
-          <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{{ category }}</h3>
-          <div class="space-y-3">
-            <div
-              v-for="item in items" :key="item.id"
-              :class="[
-                'bg-white rounded-2xl shadow-sm border p-5 transition',
-                item.reserved ? 'opacity-60 border-slate-100' : 'border-slate-100 hover:shadow-md'
-              ]"
-            >
-              <div class="flex items-start gap-4">
-                <!-- Preview image: manual takes priority, falls back to scraped og:image -->
-                <template v-if="item.image || item.link">
-                  <a v-if="item.image" :href="item.link || undefined" :target="item.link ? '_blank' : undefined" rel="noopener" class="flex-shrink-0">
-                    <img :src="item.image" :class="['w-20 h-20 object-cover rounded-xl border border-slate-100', item.reserved && 'grayscale']" />
-                  </a>
-                  <template v-else>
-                    <div v-if="preview(item.link) === null" class="flex-shrink-0 w-20 h-20 rounded-xl bg-slate-100 animate-pulse" />
-                    <a v-else-if="preview(item.link)" :href="item.link" target="_blank" rel="noopener" class="flex-shrink-0">
-                      <img :src="preview(item.link)" :class="['w-20 h-20 object-cover rounded-xl border border-slate-100', item.reserved && 'grayscale']" />
+        <!-- Sort toggle -->
+        <div v-if="wishlist.items.length > 0" class="flex justify-end gap-1 mb-4">
+          <button
+            v-for="opt in ['category', 'price']" :key="opt"
+            @click="sortBy = opt"
+            :class="[
+              'text-xs font-medium px-3 py-1.5 rounded-lg transition',
+              sortBy === opt ? 'bg-indigo-100 text-indigo-700' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+            ]"
+          >{{ t(opt === 'category' ? 'share.sortDefault' : 'share.sortPrice') }}</button>
+        </div>
+
+        <!-- Grouped by category -->
+        <template v-if="sortBy === 'category'">
+          <div v-for="(items, category) in groupedItems" :key="category" class="mb-8">
+            <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{{ category }}</h3>
+            <div class="space-y-3">
+              <div v-for="item in items" :key="item.id" :class="['bg-white rounded-2xl shadow-sm border p-5 transition', item.reserved ? 'opacity-60 border-slate-100' : 'border-slate-100 hover:shadow-md']">
+                <div class="flex items-start gap-4">
+                  <template v-if="item.image || item.link">
+                    <a v-if="item.image" :href="item.link || undefined" :target="item.link ? '_blank' : undefined" rel="noopener" class="flex-shrink-0">
+                      <img :src="item.image" :class="['w-20 h-20 object-cover rounded-xl border border-slate-100', item.reserved && 'grayscale']" />
                     </a>
+                    <template v-else>
+                      <div v-if="preview(item.link) === null" class="flex-shrink-0 w-20 h-20 rounded-xl bg-slate-100 animate-pulse" />
+                      <a v-else-if="preview(item.link)" :href="item.link" target="_blank" rel="noopener" class="flex-shrink-0">
+                        <img :src="preview(item.link)" :class="['w-20 h-20 object-cover rounded-xl border border-slate-100', item.reserved && 'grayscale']" />
+                      </a>
+                    </template>
                   </template>
-                </template>
-
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <span :class="['font-semibold text-slate-800', item.reserved && 'line-through']">{{ item.name }}</span>
-                    <span v-if="item.price" class="text-sm font-medium text-indigo-600">{{ formatPrice(item.price) }}</span>
-                    <a v-if="item.link" :href="item.link" target="_blank" rel="noopener" class="text-indigo-400 hover:text-indigo-600 text-sm transition">
-                      🔗 {{ t('share.productLink') }}
-                    </a>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span :class="['font-semibold text-slate-800', item.reserved && 'line-through']">{{ item.name }}</span>
+                      <span v-if="item.price" class="text-sm font-medium text-indigo-600">{{ formatPrice(item.price) }}</span>
+                      <a v-if="item.link" :href="item.link" target="_blank" rel="noopener" class="text-indigo-400 hover:text-indigo-600 text-sm transition">🔗 {{ t('share.productLink') }}</a>
+                    </div>
+                    <p v-if="item.description" class="text-sm text-slate-500 mt-1">{{ item.description }}</p>
+                    <p v-if="item.reserved" class="text-xs text-emerald-600 font-medium mt-2">✓ {{ t('share.alreadyReserved') }}</p>
                   </div>
-                  <p v-if="item.description" class="text-sm text-slate-500 mt-1">{{ item.description }}</p>
-                  <p v-if="item.reserved" class="text-xs text-emerald-600 font-medium mt-2">✓ {{ t('share.alreadyReserved') }}</p>
+                  <button v-if="!item.reserved" @click="openReserve(item)" class="flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">
+                    {{ t('share.reserve') }}
+                  </button>
                 </div>
-
-                <button
-                  v-if="!item.reserved"
-                  @click="openReserve(item)"
-                  class="flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition"
-                >
-                  {{ t('share.reserve') }}
-                </button>
               </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Sorted by price (flat list) -->
+        <div v-else class="space-y-3">
+          <div v-for="item in priceSortedItems" :key="item.id" :class="['bg-white rounded-2xl shadow-sm border p-5 transition', item.reserved ? 'opacity-60 border-slate-100' : 'border-slate-100 hover:shadow-md']">
+            <div class="flex items-start gap-4">
+              <template v-if="item.image || item.link">
+                <a v-if="item.image" :href="item.link || undefined" :target="item.link ? '_blank' : undefined" rel="noopener" class="flex-shrink-0">
+                  <img :src="item.image" :class="['w-20 h-20 object-cover rounded-xl border border-slate-100', item.reserved && 'grayscale']" />
+                </a>
+                <template v-else>
+                  <div v-if="preview(item.link) === null" class="flex-shrink-0 w-20 h-20 rounded-xl bg-slate-100 animate-pulse" />
+                  <a v-else-if="preview(item.link)" :href="item.link" target="_blank" rel="noopener" class="flex-shrink-0">
+                    <img :src="preview(item.link)" :class="['w-20 h-20 object-cover rounded-xl border border-slate-100', item.reserved && 'grayscale']" />
+                  </a>
+                </template>
+              </template>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span :class="['font-semibold text-slate-800', item.reserved && 'line-through']">{{ item.name }}</span>
+                  <span v-if="item.price" class="text-sm font-medium text-indigo-600">{{ formatPrice(item.price) }}</span>
+                  <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{{ item.category }}</span>
+                  <a v-if="item.link" :href="item.link" target="_blank" rel="noopener" class="text-indigo-400 hover:text-indigo-600 text-sm transition">🔗 {{ t('share.productLink') }}</a>
+                </div>
+                <p v-if="item.description" class="text-sm text-slate-500 mt-1">{{ item.description }}</p>
+                <p v-if="item.reserved" class="text-xs text-emerald-600 font-medium mt-2">✓ {{ t('share.alreadyReserved') }}</p>
+              </div>
+              <button v-if="!item.reserved" @click="openReserve(item)" class="flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">
+                {{ t('share.reserve') }}
+              </button>
             </div>
           </div>
         </div>
@@ -139,6 +171,7 @@ const reserveItem  = ref(null)
 const reserverName = ref('')
 const reserveError = ref('')
 const reserving    = ref(false)
+const sortBy       = ref('category')
 
 function switchLocale(loc) { setLocale(loc) }
 
@@ -160,6 +193,16 @@ const groupedItems = computed(() => {
     groups[item.category].push(item)
   }
   return Object.fromEntries(Object.entries(groups).sort(([a], [b]) => a.localeCompare(b)))
+})
+
+const priceSortedItems = computed(() => {
+  if (!wishlist.value) return []
+  return [...wishlist.value.items].sort((a, b) => {
+    if (a.price == null && b.price == null) return 0
+    if (a.price == null) return 1
+    if (b.price == null) return -1
+    return a.price - b.price
+  })
 })
 
 function formatPrice(p) {
