@@ -49,6 +49,17 @@
           />
         </div>
 
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('modal.image') }}</label>
+          <input
+            v-model="form.image"
+            type="url"
+            :placeholder="t('modal.imagePlaceholder')"
+            class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+          <img v-if="form.image" :src="form.image" class="mt-2 w-20 h-20 object-cover rounded-xl border border-slate-100" @error="form.image = ''" />
+        </div>
+
         <div class="mb-6">
           <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('modal.note') }}</label>
           <textarea
@@ -81,13 +92,14 @@ const props = defineProps({
 const emit = defineEmits(['save', 'close'])
 const { t } = useI18n()
 
-const form = reactive({ name: '', category: '', price: '', link: '', description: '' })
+const form = reactive({ name: '', category: '', price: '', link: '', image: '', description: '' })
 
 watch(() => props.item, (val) => {
   form.name        = val?.name        ?? ''
   form.category    = val?.category    ?? ''
   form.price       = val?.price != null ? String(val.price) : ''
   form.link        = val?.link        ?? ''
+  form.image       = val?.image       ?? ''
   form.description = val?.description ?? ''
 }, { immediate: true })
 
@@ -98,6 +110,7 @@ function submit() {
     category:    form.category.trim() || 'General',
     price:       form.price !== '' ? parseFloat(form.price) : null,
     link:        form.link.trim(),
+    image:       form.image.trim(),
     description: form.description.trim(),
   })
 }

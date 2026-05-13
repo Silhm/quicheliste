@@ -69,12 +69,17 @@
               </div>
             </div>
 
-            <!-- Preview image -->
-            <template v-if="item.link">
-              <div v-if="preview(item.link) === null" class="flex-shrink-0 w-16 h-16 rounded-xl bg-slate-100 animate-pulse" />
-              <a v-else-if="preview(item.link)" :href="item.link" target="_blank" rel="noopener" class="flex-shrink-0">
-                <img :src="preview(item.link)" class="w-16 h-16 object-cover rounded-xl border border-slate-100" />
+            <!-- Preview image: manual takes priority, falls back to scraped og:image -->
+            <template v-if="item.image || item.link">
+              <a v-if="item.image" :href="item.link || undefined" :target="item.link ? '_blank' : undefined" rel="noopener" class="flex-shrink-0">
+                <img :src="item.image" class="w-16 h-16 object-cover rounded-xl border border-slate-100" />
               </a>
+              <template v-else>
+                <div v-if="preview(item.link) === null" class="flex-shrink-0 w-16 h-16 rounded-xl bg-slate-100 animate-pulse" />
+                <a v-else-if="preview(item.link)" :href="item.link" target="_blank" rel="noopener" class="flex-shrink-0">
+                  <img :src="preview(item.link)" class="w-16 h-16 object-cover rounded-xl border border-slate-100" />
+                </a>
+              </template>
             </template>
           </div>
         </div>

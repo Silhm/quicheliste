@@ -79,6 +79,8 @@ export default {
     pricePlaceholder: 'e.g. 29.99',
     link: 'Link',
     linkPlaceholder: 'https://…',
+    image: 'Image URL',
+    imagePlaceholder: 'https://… (leave blank to use auto-detected image)',
     note: 'Note',
     notePlaceholder: 'Size, colour, any detail that helps…',
     addButton: 'Add item',
