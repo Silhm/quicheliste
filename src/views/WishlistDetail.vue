@@ -52,9 +52,14 @@
             draggable="true"
             @dragstart="onDragStart($event, item)"
             @dragend="onDragEnd"
-            @dragover.prevent="onDragOver(category)"
+            @dragover.prevent.stop="onDragOverItem(item, category)"
             @drop.prevent.stop="onDropItem(item, category)"
-            :class="['bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex gap-4 cursor-grab active:cursor-grabbing transition-opacity select-none', draggingItem?.id === item.id && 'opacity-30']"
+            :class="[
+              'relative bg-white rounded-2xl shadow-sm p-4 flex gap-4 cursor-grab active:cursor-grabbing transition-opacity select-none',
+              draggingItem?.id === item.id ? 'opacity-30 border border-slate-100' :
+              dragOverItem?.id === item.id ? 'border-2 border-indigo-400' :
+              'border border-slate-100'
+            ]"
           >
             <div class="flex items-center text-slate-300 text-lg leading-none select-none px-0.5">⠿</div>
             <div class="flex-1 min-w-0">
@@ -126,8 +131,9 @@ const titleDraft      = ref('')
 const shareCopied     = ref(false)
 const modalOpen       = ref(false)
 const editingItem     = ref(null)
-const draggingItem    = ref(null)
+const draggingItem     = ref(null)
 const dragOverCategory = ref(null)
+const dragOverItem     = ref(null)
 onMounted(() => store.fetchOne(route.params.id))
 
 const groupedItems = computed(() => {
@@ -183,39 +189,55 @@ async function deleteItem(item) {
   await store.removeItem(store.current.id, item.id)
 }
 
+function clearDragState() {
+  draggingItem.value     = null
+  dragOverCategory.value = null
+  dragOverItem.value     = null
+}
+
 function onDragStart(event, item) {
   draggingItem.value = item
   event.dataTransfer.effectAllowed = 'move'
 }
 
-function onDragEnd() {
-  draggingItem.value    = null
-  dragOverCategory.value = null
-}
+function onDragEnd() { clearDragState() }
 
 function onDragOver(category) {
-  if (draggingItem.value) dragOverCategory.value = category
+  if (!draggingItem.value) return
+  dragOverCategory.value = category
+  dragOverItem.value     = null
+}
+
+function onDragOverItem(item, category) {
+  if (!draggingItem.value) return
+  dragOverCategory.value = category
+  dragOverItem.value     = item
 }
 
 async function onDropItem(targetItem, targetCategory) {
   const src = draggingItem.value
-  draggingItem.value    = null
-  dragOverCategory.value = null
+  clearDragState()
   if (!src || src.id === targetItem.id) return
 
   if (src.category === targetCategory) {
-    await store.updateItem(store.current.id, src.id,        { sort_order: targetItem.sort_order })
-    await store.updateItem(store.current.id, targetItem.id, { sort_order: src.sort_order })
+    // Insert src before targetItem, then reassign contiguous sort_orders
+    const sorted    = [...groupedItems.value[targetCategory]]
+    const reordered = sorted.filter(i => i.id !== src.id)
+    reordered.splice(reordered.findIndex(i => i.id === targetItem.id), 0, src)
+    await Promise.all(reordered.map((item, i) =>
+      store.updateItem(store.current.id, item.id, { sort_order: i + 1 })
+    ))
     await store.fetchOne(store.current.id)
   } else {
-    await store.updateItem(store.current.id, src.id, { category: targetCategory, sort_order: targetItem.sort_order })
+    const items = groupedItems.value[targetCategory] || []
+    const idx   = items.findIndex(i => i.id === targetItem.id)
+    await store.updateItem(store.current.id, src.id, { category: targetCategory, sort_order: idx + 1 })
   }
 }
 
 async function onDropCategory(category) {
   const src = draggingItem.value
-  draggingItem.value    = null
-  dragOverCategory.value = null
+  clearDragState()
   if (!src || src.category === category) return
 
   const items    = groupedItems.value[category] || []
